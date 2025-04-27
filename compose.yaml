@@ -1,0 +1,60 @@
+# compose.yaml
+# Common services and settings for both development and production
+
+services:
+  db:
+    # Use a PostgreSQL image for the database
+    image: postgres:17-alpine
+    volumes:
+      # Persist database data
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      # TODO: Replace with strong, secret passwords.
+      # Use environment variables or .env file in production.
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    # Use restart policy to ensure the container restarts if it fails
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+    restart: always
+
+  backend:
+    # Define the build context for the backend service
+    build:
+      context: ./backend
+      # No 'dockerfile' or 'target' specified here.
+      # These will be overridden in dev/prod compose files.
+    # Common environment variables (optional, could be in dev/prod too)
+    environment:
+      - DATABASE_URL=postgres://myuser:mypassword@db:5432/mydatabase # Example DB connection string
+    # Use depends_on to ensure db starts before backend
+    depends_on:
+      - db
+    # Common networks
+    networks:
+      - app_network
+
+  frontend:
+    # Define the build context for the frontend service
+    build:
+      context: ./frontend
+      # No 'dockerfile' or 'target' specified here.
+      # These will be overridden in dev/prod compose files.
+    # Common networks
+    networks:
+      - app_network
+    ports:
+      - "5173:5173"
+
+# Define networks and volumes
+networks:
+  # A shared network for all services
+  app_network:
+    driver: bridge
+
+volumes:
+  # Volume for PostgreSQL data persistence
+  postgres_data:

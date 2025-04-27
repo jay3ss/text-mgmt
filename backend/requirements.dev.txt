@@ -1,0 +1,6 @@
+black
+Django
+django-debug-toolbar
+Faker
+ipython
+psycopg2-binary
