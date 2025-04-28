@@ -28,8 +28,8 @@ services:
       # No 'dockerfile' or 'target' specified here.
       # These will be overridden in dev/prod compose files.
     # Common environment variables (optional, could be in dev/prod too)
-    environment:
-      - DATABASE_URL=postgres://myuser:mypassword@db:5432/mydatabase # Example DB connection string
+    # environment:
+    #   - DATABASE_URL=postgres://myuser:mypassword@db:5432/mydatabase # Example DB connection string
     # Use depends_on to ensure db starts before backend
     depends_on:
       - db
