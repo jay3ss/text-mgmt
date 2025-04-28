@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # local apps
     "accounts.apps.AccountsConfig",
+    "text_management.apps.TextManagementConfig",
 ]
 
 MIDDLEWARE = [
