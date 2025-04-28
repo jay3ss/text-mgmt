@@ -7,6 +7,9 @@ class TextChunk(models.Model):
     def __str__(self):
         return self.text[:50] + ("..." if len(self.text) > 50 else "")
 
+    def __len__(self) -> int:
+        return len(self.text)
+
 
 class Author(models.Model):
     first_name = models.CharField(max_length=50)
@@ -126,6 +129,10 @@ class TextChunkMetadata(models.Model):
         Publisher,
         blank=True,
     )
+
+    class Meta:
+        verbose_name = "Text chunks metadata"
+        verbose_name_plural = "Text chunks metadata"
 
     def __str__(self):
         if self.title:
