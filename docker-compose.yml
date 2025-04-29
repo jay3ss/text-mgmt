@@ -1,0 +1,17 @@
+# # backend/docker-compose.yml
+# # Common backend service definition (less relevant with root compose files)
+
+# services:
+#   backend:
+#     build:
+#       context: .
+#     environment:
+#       DATABASE_NAME=postgres
+#       DATABASE_USER=postgres
+#       DATABASE_PASSWORD=postgres
+#       DATABASE_HOST=db
+#       DATABASE_PORT=5432
+#     depends_on:
+#       - db # Assumes a db service is defined elsewhere (like in root compose.yaml)
+#     networks:
+#       - app_network # Assumes app_network is defined elsewhere

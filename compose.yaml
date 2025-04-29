@@ -37,17 +37,17 @@ services:
     networks:
       - app_network
 
-  frontend:
-    # Define the build context for the frontend service
-    build:
-      context: ./frontend
-      # No 'dockerfile' or 'target' specified here.
-      # These will be overridden in dev/prod compose files.
-    # Common networks
-    networks:
-      - app_network
-    ports:
-      - "5173:5173"
+  # frontend:
+  #   # Define the build context for the frontend service
+  #   build:
+  #     context: ./frontend
+  #     # No 'dockerfile' or 'target' specified here.
+  #     # These will be overridden in dev/prod compose files.
+  #   # Common networks
+  #   networks:
+  #     - app_network
+  #   ports:
+  #     - "5173:5173"
 
 # Define networks and volumes
 networks:

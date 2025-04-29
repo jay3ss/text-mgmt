@@ -5,6 +5,7 @@ services:
   backend:
     # Use the development Dockerfile
     build:
+      context: ./backend
       dockerfile: Dockerfile.dev
     # Map backend port to host (e.g., Django dev server)
     ports:
@@ -17,28 +18,33 @@ services:
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     environment:
-      - DEBUG=True # Example debug setting
-      # Other dev specific environment variables
+      - DEBUG=True
+      - DATABASE_NAME=postgres
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
 
-  frontend:
-    # Use the development Dockerfile
-    build:
-      dockerfile: Dockerfile.dev
-    # Map frontend port to host (e.g., Vite dev server)
-    ports:
-      - "3000:3000"
-    # Mount the frontend code for hot-reloading
-    volumes:
-      - ./frontend:/app
-      # Optional: If node_modules are giving trouble, you might need to manage them carefully
-      # - /app/node_modules
-    # Override the command to run the Vite development server
-    command: >
-      sh -c "npm install && npm run dev -- --host 0.0.0.0"
-    environment:
-      - NODE_ENV=development
-      # Add env vars needed by your frontend, e.g., API URL
-      - VITE_API_URL=http://backend:8000
+  # frontend:
+  #   # Use the development Dockerfile
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile.dev
+  #   # Map frontend port to host (e.g., Vite dev server)
+  #   ports:
+  #     - "5173:5173"
+  #   # Mount the frontend code for hot-reloading
+  #   volumes:
+  #     - ./frontend:/app
+  #     # Optional: If node_modules are giving trouble, you might need to manage them carefully
+  #     # - /app/node_modules
+  #   # Override the command to run the Vite development server
+  #   command: >
+  #     sh -c "npm install && npm run dev -- --host 0.0.0.0"
+  #   environment:
+  #     - NODE_ENV=development
+  #     # Add env vars needed by your frontend, e.g., API URL
+  #     - VITE_API_URL=http://backend:8000
 
   # Database service usually remains the same or slightly simpler in dev
   db:

@@ -129,6 +129,12 @@ class TextChunkMetadata(models.Model):
         Publisher,
         blank=True,
     )
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = "Text chunks metadata"
