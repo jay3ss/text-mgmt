@@ -119,15 +119,22 @@ class TextChunkMetadata(models.Model):
         blank=True,
         null=True,
     )
-    text_chunk = models.ForeignKey(
+    text_chunk = models.OneToOneField(
         TextChunk,
         on_delete=models.CASCADE,
+        related_name="metadata",
         blank=True,
         null=True,
     )
     publishers = models.ManyToManyField(
         Publisher,
         blank=True,
+    )
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
     )
 
     class Meta:
