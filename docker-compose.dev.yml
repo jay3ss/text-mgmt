@@ -1,34 +1,52 @@
 services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   web:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - ./:/app
-    ports:
-      - "8000:8000"
+    image: text-mgmt-system-dev
+    command:
+      - ./docker-entrypoint.sh
+      - python
+      - manage.py
+      - runserver
+      - 0.0.0.0:8000
+    # ports:
+    #   - "8000:8000"
     environment:
-      - DEBUG=True
-      - DATABASE_HOST=db
-      - DATABASE_PORT=5432
-      - DATABASE_NAME=postgres
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=postgres
+      DATABASE_URL: "postgres://postgres:postgres@db:5432/postgres"
+      DEBUG: "1"
+    volumes:
+      - .:/app:delegated
     depends_on:
-      - db
-    networks:
-      - app_network
+      db:
+        condition: service_started
 
   proxy:
-    image: nginx:stable-alpine
+    build:
+      context: ./nginx
     ports:
-      - "8080:80"
-    volumes:
-      - ./ngninx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - "443:443"       # HTTPS
+      - "80:80"         # Redirect to HTTPS
     depends_on:
       - web
     networks:
       - app_network
+
+networks:
+  app_network:
+    external: false
+
+volumes:
+  postgres_data:

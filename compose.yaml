@@ -4,11 +4,15 @@ networks:
 
 services:
   proxy:
-    image: nginx:stable-alpine
+    build:
+      context: ./nginx
     ports:
-      - "80:80"
+      - "443:443"       # serve HTTPS
+      - "8888:80"         # redirect HTTP → HTTPS
     volumes:
-      - ./ngninx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs/selfsigned.crt:/etc/nginx/ssl/selfsigned.crt:ro
+      - ./nginx/certs/selfsigned.key:/etc/nginx/ssl/selfsigned.key:ro
     networks:
       - app_network
     depends_on:
@@ -24,9 +28,12 @@ services:
       - app_network
     depends_on:
       - db
+    user: "${UID}:${GID}"
 
   db:
     image: postgres:17-alpine
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -38,6 +45,51 @@ services:
 
 volumes:
   postgres_data:
+
+
+# networks:
+#   app_network:
+#     driver: bridge
+
+# services:
+#   proxy:
+#     image: nginx:stable-alpine
+#     ports:
+#       - "8080:80"
+#     volumes:
+#       - ./ngninx/nginx.conf:/etc/nginx/nginx.conf:ro
+#     networks:
+#       - app_network
+#     depends_on:
+#       - web
+
+#   web:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.prod
+#     environment:
+#       - DJANGO_SETTINGS_MODULE=django_project.settings
+#     networks:
+#       - app_network
+#     depends_on:
+#       - db
+#     user: "${UID}:${GID}"
+
+#   db:
+#     image: postgres:17-alpine
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     environment:
+#       - POSTGRES_DB=postgres
+#       - POSTGRES_USER=postgres
+#       - POSTGRES_PASSWORD=postgres
+#     networks:
+#       - app_network
+
+# volumes:
+#   postgres_data:
 
 
 

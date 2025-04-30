@@ -8,14 +8,24 @@ FROM python:3.12-alpine as builder
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Install dependencies
+# create a non-root user and switch
+RUN groupadd --gid 1000 appgroup \
+  && useradd --uid 1000 --gid appgroup --create-home appuser
+
+# Set working directory
 WORKDIR /app
-COPY requirements.prod.txt .
-RUN pip install --no-cache-dir -r requirements.prod.txt
+COPY . .
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
+RUN python manage.py tailwind build
 COPY . .
-
 # Stage 2: Final production image
 FROM python:3.12-alpine
 
