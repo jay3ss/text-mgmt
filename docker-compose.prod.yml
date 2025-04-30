@@ -1,73 +1,122 @@
-# docker-compose.prod.yml
-# Configuration for the production environment
+version: "3.8"
 
 services:
-  backend:
-    # Use the production Dockerfile
+  web:
     build:
+      context: .
       dockerfile: Dockerfile.prod
-      # Specify build arguments if needed in prod Dockerfile
-      # args:
-      #   - ARG_NAME=arg_value
-    # No port mapping here; Nginx will proxy requests
-    # No volume mounts for code; code is baked into the image
-    # Override the command to run the production server (e.g., Gunicorn)
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-             python manage.py collectstatic --noinput &&
-             gunicorn myproject.wsgi:application --bind 0.0.0.0:8000" # Replace myproject
+      target: backend
+    command: sh ./start-prod.sh
+    ports:
+      - "8000:8000"
     environment:
       - DEBUG=False
-      - SECRET_KEY=YOUR_SECRET_KEY # **MUST be set securely in production**
-      - ALLOWED_HOSTS=your_domain.com,localhost # Replace with your domain(s)
-      # Other prod specific environment variables
-
-  frontend:
-    # Use the production Dockerfile
-    build:
-      dockerfile: Dockerfile.prod
-    # No port mapping here; Nginx will serve the static files
-    # No volume mounts for code; built assets are baked into the image
-    # In production, the command might just be a placeholder if Nginx serves the files
-    # Or, it might be a simple static server if not using Nginx
-    command: "nginx -g 'daemon off;'" # If using Nginx baked into frontend image
-
-  nginx:
-    # Use a standard Nginx image
-    image: nginx:alpine
-    volumes:
-      # Mount the Nginx configuration file
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      # Mount frontend build output to be served by Nginx
-      # Make sure this path matches the output directory in frontend/Dockerfile.prod
-      - frontend_build:/usr/share/nginx/html
-      # Optional: Mount backend static/media files if served by Nginx
-      # - backend_static:/app/static
-      # - backend_media:/app/media
-    ports:
-      # Map Nginx port to host (standard HTTP)
-      - "80:80"
-      # Optional: Map HTTPS port if you handle SSL here
-      # - "443:443"
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
     depends_on:
-      - backend # Nginx needs backend to proxy API calls
-      - frontend # Nginx needs frontend to serve static files
+      - db
     networks:
       - app_network
 
-  # Database service configuration for production
   db:
-    # Consider more robust settings for production, e.g., backups, monitoring
-    # The configuration here inherits from compose.yaml but you could add more
+    image: postgres:17-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      # Ensure strong, secret passwords
-      - POSTGRES_DB=mydatabase
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - app_network
 
-# Define volumes for Nginx to access frontend build output
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./ngninx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
 volumes:
-  frontend_build: # Volume to hold the built frontend assets
-  # Optional volumes for backend static/media if served by Nginx
-  # backend_static:
-  # backend_media:
+  postgres_data:
+
+
+# # docker-compose.prod.yml
+# # Configuration for the production environment
+
+# services:
+#   backend:
+#     # Use the production Dockerfile
+#     build:
+#       dockerfile: Dockerfile.prod
+#       # Specify build arguments if needed in prod Dockerfile
+#       # args:
+#       #   - ARG_NAME=arg_value
+#     # No port mapping here; Nginx will proxy requests
+#     # No volume mounts for code; code is baked into the image
+#     # Override the command to run the production server (e.g., Gunicorn)
+#     command: >
+#       sh -c "python manage.py migrate --noinput &&
+#              python manage.py collectstatic --noinput &&
+#              gunicorn myproject.wsgi:application --bind 0.0.0.0:8000" # Replace myproject
+#     environment:
+#       - DEBUG=False
+#       - SECRET_KEY=YOUR_SECRET_KEY # **MUST be set securely in production**
+#       - ALLOWED_HOSTS=your_domain.com,localhost # Replace with your domain(s)
+#       # Other prod specific environment variables
+
+#   frontend:
+#     # Use the production Dockerfile
+#     build:
+#       dockerfile: Dockerfile.prod
+#     # No port mapping here; Nginx will serve the static files
+#     # No volume mounts for code; built assets are baked into the image
+#     # In production, the command might just be a placeholder if Nginx serves the files
+#     # Or, it might be a simple static server if not using Nginx
+#     command: "nginx -g 'daemon off;'" # If using Nginx baked into frontend image
+
+#   nginx:
+#     # Use a standard Nginx image
+#     image: nginx:alpine
+#     volumes:
+#       # Mount the Nginx configuration file
+#       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+#       # Mount frontend build output to be served by Nginx
+#       # Make sure this path matches the output directory in frontend/Dockerfile.prod
+#       - frontend_build:/usr/share/nginx/html
+#       # Optional: Mount backend static/media files if served by Nginx
+#       # - backend_static:/app/static
+#       # - backend_media:/app/media
+#     ports:
+#       # Map Nginx port to host (standard HTTP)
+#       - "80:80"
+#       # Optional: Map HTTPS port if you handle SSL here
+#       # - "443:443"
+#     depends_on:
+#       - backend # Nginx needs backend to proxy API calls
+#       - frontend # Nginx needs frontend to serve static files
+#     networks:
+#       - app_network
+
+#   # Database service configuration for production
+#   db:
+#     # Consider more robust settings for production, e.g., backups, monitoring
+#     # The configuration here inherits from compose.yaml but you could add more
+#     environment:
+#       # Ensure strong, secret passwords
+#       - POSTGRES_DB=mydatabase
+#       - POSTGRES_USER=myuser
+#       - POSTGRES_PASSWORD=mypassword
+
+# # Define volumes for Nginx to access frontend build output
+# volumes:
+#   frontend_build: # Volume to hold the built frontend assets
+#   # Optional volumes for backend static/media if served by Nginx
+#   # backend_static:
+#   # backend_media:

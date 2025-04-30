@@ -1,9 +1,0 @@
-# frontend/docker-compose.yml
-# Common frontend service definition (less relevant with root compose files)
-
-services:
-  frontend:
-    build:
-      context: .
-    # networks:
-    #   - app_network # Assumes app_network is defined elsewhere

@@ -2,7 +2,7 @@
 # Development Dockerfile for the Django backend
 
 # Use a base image with Python
-FROM python:3.12
+FROM python:3.12 AS backend
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
