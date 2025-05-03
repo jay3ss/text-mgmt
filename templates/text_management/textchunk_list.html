@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="text-3xl font-bold text-gray-800 mb-6">Text Chunks</h1>
+
+  {% comment %} Container for the grid of cards - Increased gap for more space {% endcomment %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"> {# Increased gap from gap-8 to gap-10 for more space #}
+    {% for text_chunk in page_obj %} {# Use page_obj to iterate over the current page's objects #}
+      {% comment %}
+        Styled each item as a card container (div instead of a).
+        Added padding, border, rounded corners, and shadow.
+      {% endcomment %}
+      <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow-md"> {# Retained shadow-md for pop-out effect #}
+
+        {% comment %} Card Heading: Use Title if available, otherwise use truncated text {% endcomment %}
+        <h5 class="mb-3 text-xl font-bold tracking-tight text-gray-900">
+            {% if text_chunk.metadata and text_chunk.metadata.title %}
+                {{ text_chunk.metadata.title.title }}
+            {% else %}
+                {{ text_chunk.text|truncatechars:150 }} {# Fallback to truncated text #}
+            {% endif %}
+        </h5>
+
+        {% comment %} Metadata acting as the card description - displaying counts {% endcomment %}
+        {% if text_chunk.metadata %}
+          <div class="font-normal text-gray-700 text-sm space-y-1"> {# Adjusted font size, color, and added space-y for spacing between metadata lines #}
+              {% comment %} Display Title here if it exists in metadata {% endcomment %}
+              {% if text_chunk.metadata.title %} {# Simplified the condition here #}
+                 <p><span class="font-medium">Title:</span> {{ text_chunk.metadata.title.title }}</p>
+              {% endif %}
+              {% if text_chunk.metadata.authors.all %}
+                {% comment %} Displaying the number of authors {% endcomment %}
+                <p><span class="font-medium">Authors:</span> {{ text_chunk.metadata.authors.count }}</p>
+              {% endif %}
+              {% if text_chunk.metadata.publishers.all %}
+                 {% comment %} Displaying the number of publishers {% endcomment %}
+                <p><span class="font-medium">Publishers:</span> {{ text_chunk.metadata.publishers.count }}</p>
+              {% endif %}
+               {% if text_chunk.metadata.publish_date %}
+                <p><span class="font-medium">Publish Date:</span> {{ text_chunk.metadata.publish_date|date:"F j, Y" }}</p>
+              {% endif %}
+               {% if text_chunk.metadata.language %}
+                <p><span class="font-medium">Language:</span> {{ text_chunk.metadata.language.name }}</p>
+              {% endif %}
+          </div>
+        {% endif %}
+
+        {% comment %} Textual link to the detail page {% endcomment %}
+        <div class="mt-4"> {# Added margin-top for space above the link #}
+             <a href="{% url 'tm:tc-detail' pk=text_chunk.pk %}" class="text-blue-600 hover:underline text-sm font-medium"> {# Styled as a simple text link #}
+                Read More
+            </a>
+        </div>
+
+      </div>
+    {% empty %}
+      {% comment %} Styled the empty state message as a card within the grid {% endcomment %}
+      <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow-md text-gray-600 italic col-span-full"> {# col-span-full makes it span across all columns in the grid #}
+        No text chunks yet.
+      </div>
+    {% endfor %}
+  </div>
+
+  {% comment %} Pagination controls {% endcomment %}
+  {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-8 flex justify-center">
+      <ul class="inline-flex items-center -space-x-px">
+        {% if page_obj.has_previous %}
+          <li>
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">Previous</a>
+          </li>
+        {% endif %}
+
+        {% for i in paginator.page_range %}
+          <li>
+            <a href="?page={{ i }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 {% if page_obj.number == i %}text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 border-blue-300{% endif %}">{{ i }}</a>
+          </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li>
+            <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">Next</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+
+{% endblock %}

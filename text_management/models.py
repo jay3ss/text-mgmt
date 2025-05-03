@@ -1,4 +1,36 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.db import models
+
+
+class SearchIndex(models.Model):
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+    )
+    content_object = GenericForeignKey("content_type", "object_id")
+    object_id = models.PositiveBigIntegerField()
+
+    # to store the combined text for vectorization
+    text_content = models.TextField()
+
+    search_vector = SearchVectorField(null=True)
+
+    class Meta:
+        unique_together = "content_type", "object_id"
+        verbose_name = "Search index"
+        verbose_name_plural = "Search indices"
+        indexes = [
+            GinIndex(
+                fields=["search_vector"],
+                name="search_vector_gin_idx",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Index for {self.content_type} ID {self.object_id}"
 
 
 class TextChunk(models.Model):

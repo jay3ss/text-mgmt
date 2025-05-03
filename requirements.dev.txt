@@ -1,6 +1,7 @@
 black
 Django
 django-debug-toolbar
+django-extensions
 Faker
 ipython
 psycopg2-binary

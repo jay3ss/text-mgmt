@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Home{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-8 px-4">
+    <div class="flex justify-center">
+        <div class="w-full max-w-xl">
+            <h1 class="text-4xl font-bold text-center mb-8">Text Chunk Search</h1>
+
+            {# Search Form #}
+            {# Updated action to use 'tm:home' as specified #}
+            <form method="get" action="{% url 'tm:home' %}" class="flex items-center border-b border-teal-500 py-2 mb-8">
+                <input
+                    class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                    type="text"
+                    placeholder="Search..."
+                    aria-label="Search query"
+                    name="q"
+                    value="{{ query|default:'' }}"
+                >
+                <button
+                    class="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-2 rounded"
+                    type="submit"
+                >
+                    Search
+                </button>
+            </form>
+
+            {# Search Results Area #}
+            <div class="mt-8">
+                {% if query %}
+                    <h2 class="text-2xl font-semibold mb-4"> {{search_results|length}} results for "{{ query }}"</h2>
+                    {% if search_results %}
+                        <ul class="space-y-6">
+                            {% for result in search_results %}
+                                {% with item=result.content_object %}
+                                    {% if item %}
+                                        <li class="p-4 border rounded-lg shadow-sm bg-white">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm text-gray-600">
+                                                    Type: {{ result.content_type.model|capfirst }}
+                                                </span>
+                                                {% if result.rank is not None %}
+                                                    <span class="text-xs text-gray-600">
+                                                        Rank: {{ result.rank|floatformat:2 }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <h3 class="text-lg font-bold text-gray-800 mb-1">
+                                                {% if item.title %}
+                                                    {{ item.title }}
+                                                {% elif item.name %}
+                                                    {{ item.name }}
+                                                {% else %}
+                                                    {{ item }} {# Fallback to __str__ of the original item #}
+                                                {% endif %}
+                                            </h3>
+                                            <p class="text-gray-700 text-sm">
+                                                {% if result.highlighted_text %}
+                                                    {# Use |safe filter because ts_headline output is HTML #}
+                                                    {{ result.highlighted_text|safe }}
+                                                {% elif result.text_content %}
+                                                    {# Fallback to original text_content if highlighting wasn't applied #}
+                                                    {{ result.text_content|truncatechars:300 }} {# Still truncate fallback #}
+                                                {% else %}
+                                                    {{ item|truncatechars:300 }} {# Final fallback using original item #}
+                                                {% endif %}
+                                            </p>
+                                            {# Optional: Add a link to the original object's detail page #}
+                                            {# This requires defining URLs and views for each object type #}
+                                            {# Example (assuming you have a detail URL pattern named 'textchunk_detail' that takes a PK): #}
+                                            {% if result.content_type.model == 'textchunk' %}
+                                            <a
+                                                href="{% url 'tm:tc-detail' item.pk %}"
+                                                class="text-teal-600 hover:underline mt-2 inline-block">
+                                                Read More
+                                            </a>
+                                            {% endif %}
+                                        </li>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-600 text-center py-8">No results found for "{{ query }}".</p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-center text-gray-600 py-16">Enter a query above to search.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

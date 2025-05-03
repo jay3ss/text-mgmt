@@ -1,0 +1,30 @@
+<div class="flex justify-between items-center mb-2">
+    <span class="text-sm text-gray-500">
+        Type: {{ item.content_type.model|capfirst }}
+    </span>
+    {% if current_result.rank is not None %}
+        <span class="text-sm text-gray-500">
+            Rank: {{ current_result.rank|floatformat:2 }}
+        </span>
+    {% endif %}
+</div>
+<h3 class="text-lg font-bold text-gray-500">
+    {# Attempt to display a more descriptive title #}
+    {# This is a placeholder; you'll need to customize based on object type #}
+    {% if item.title %}
+        {{ item.title }}
+    {% elif item.name %}
+        {{ item.name }}
+    {% else %}
+        {{ item }} {# Fallback to __str__ #}
+    {% endif %}
+</h3>
+<p class="text-gray-700 text-sm line-clamp-3"> {# truncate long text #}
+    {# Display the text content from the SearchIndex query #}
+    {# Better than item.__str__ for TextChunk #}
+    {% if current_result.text_content %}
+        {{ current_result.text_content|truncatechars:300 }}
+    {% else %}
+        {{ item|truncatechars:300 }}
+    {% endif %}
+</p>

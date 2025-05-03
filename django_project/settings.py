@@ -42,16 +42,20 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
+    "django_extensions",
     # external apps
     "tailwind",
     "django_browser_reload",
+    "debug_toolbar",
     # local apps
     "accounts.apps.AccountsConfig",
     "text_management.apps.TextManagementConfig",
-    "theme",
+    "theme.apps.ThemeConfig",
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -143,3 +147,9 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 TAILWIND_APP_NAME = "theme"
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+if DEBUG:
+    # `debug` is only True in templates if the vistor IP is in INTERNAL_IPS.
+    INTERNAL_IPS = type(
+        str("c"), (), {"__contains__": lambda *a: True, "copy": lambda self: self}
+    )()

@@ -13,14 +13,14 @@
   {% tailwind_css %}
 
   {# Fallback or extra custom CSS via static files if needed #}
-  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+  {% comment %} <link rel="stylesheet" href="{% static 'css/custom.css' %}"> {% endcomment %}
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
 
   <!-- Navbar -->
   <nav class="bg-primary text-white shadow-md">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      {% comment %} <a href="{% url 'home' %}" class="text-xl font-semibold">MySite</a> {% endcomment %}
+      <a href="{% url 'tm:home' %}" class="text-xl font-semibold text-gray-900">Text Mgmt</a>
       <ul class="flex space-x-4">
         {% comment %} <li><a href="{% url 'home' %}" class="hover:text-primary-dark">Home</a></li>
         <li><a href="{% url 'about' %}" class="hover:text-primary-dark">About</a></li>
